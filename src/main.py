@@ -15,6 +15,7 @@ class MainWindow(Gtk.ApplicationWindow):
         super().__init__(*args, **kwargs)
         self.set_default_size(850, 600)
         self.set_title('DictPrg')
+        
 
         self.boxMain = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
         self.boxMain.set_spacing(5)
@@ -39,8 +40,8 @@ class MainWindow(Gtk.ApplicationWindow):
 
         self.boxFunc.append(self.boxBtn)
 
-        self.addWord = Gtk.Button(label='Add Word', hexpand=True)
-        self.boxBtn.append(self.addWord)
+        self.addWordBtn = Gtk.Button(label='Add Word', hexpand=True)
+        self.boxBtn.append(self.addWordBtn)
 
         self.rmWord = Gtk.Button(label='Delete Word', hexpand=True)
         self.boxBtn.append(self.rmWord)
@@ -48,9 +49,58 @@ class MainWindow(Gtk.ApplicationWindow):
         self.saveWord = Gtk.Button(label='Save Word', hexpand=True)
         self.boxFunc.append(self.saveWord)
 
-        #self.button = Gtk.Button(label='hello')
-        #self.boxMain.append(self.button)
-        #self.button.connect('clicked', self.hello)
+        def showAddWordDialog(self, WordList):
+            dialog = Gtk.Dialog()
+            dialog.set_title('Add new word?')
+            dialog.set_default_size(300, 130)
+            boxDialog = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+            boxDialog.set_margin_top(50)
+            boxDialog.set_margin_start(10)
+            boxDialog.set_margin_end(10)
+            dialog.set_child(boxDialog)
+            newWordEntry = Gtk.Entry(hexpand=True, vexpand=True)
+            boxDialog.append(newWordEntry)
+            boxDialogButtons = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+            boxDialogButtons.set_margin_bottom(50)
+            boxDialogButtons.set_margin_end(10)
+            boxDialogButtons.set_margin_start(10)
+            boxDialogButtons.set_margin_top(20)
+            boxDialogButtons.set_spacing(5)
+            boxDialog.append(boxDialogButtons)
+            addWordCancel = Gtk.Button(hexpand=True)
+            cancelBox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+            cancelBox.set_spacing(5)
+            iconCancel = Gtk.Image(icon_name='action-unavailable-symbolic')
+            cancelLabel = Gtk.Label(label='Cancel')
+            cancelBox.append(iconCancel)
+            cancelBox.append(cancelLabel)
+            addWordCancel.set_child(cancelBox)
+            boxDialogButtons.append(addWordCancel)
+            addWordOkay = Gtk.Button(hexpand=True)
+            okayBox = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+            okayBox.set_spacing(5)
+            iconOkay = Gtk.Image(icon_name='object-select-symbolic')
+            OkayLable = Gtk.Label(label='Add')
+            okayBox.append(iconOkay)
+            okayBox.append(OkayLable)
+            addWordOkay.set_child(okayBox)
+            boxDialogButtons.append(addWordOkay)
+            
+            dialog.present()
+
+            def showAddWordDialogCancelPressed(self):
+                dialog.destroy()
+
+            def showAddWordDialogOkayPressed(self, WordList):
+                buffer = newWordEntry.get_buffer()
+                buffer = buffer.get_text()
+                print(buffer)
+                dict[buffer] = ""
+                WordList.append(Gtk.Label(label=buffer))
+                dialog.destroy()
+
+            addWordCancel.connect('clicked', showAddWordDialogCancelPressed)
+            addWordOkay.connect('clicked', showAddWordDialogOkayPressed, WordList)
 
         with open("dict.json", "r", encoding="utf-8") as file:
             data = json.load(file)
@@ -74,8 +124,28 @@ class MainWindow(Gtk.ApplicationWindow):
                 json.dump(dict, file, sort_keys=True, ensure_ascii=False)
                 print(dict)
 
+        def DeleteWord(self, row, TextEditor, WordList):
+            if row is not None:
+                with open("dict.json", "r", encoding="utf-8") as file:
+                    data = json.load(file)
+                selectedItem = row.get_child()
+                row_data = selectedItem.get_text()
+                print(row_data)
+                data.pop(row_data)
+                with open("dict.json", "w", encoding="utf-8") as file:
+                    json.dump(data, file, ensure_ascii=False)
+                WordList.remove_all()
+                with open("dict.json", "r", encoding="utf-8") as file:
+                    data = json.load(file)
+                for key in data:
+                    WordList.append(Gtk.Label(label=key))
+                TextEditor.set_buffer("")
+
         self.WordList.connect("row-activated", showWord, self.TextEditor)
         self.saveWord.connect("clicked", SaveWord, self.TextEditor)
+        self.addWordBtn.connect('clicked', showAddWordDialog, self.WordList)
+        self.rmWord.connect('clicked', DeleteWord, self.WordList.get_selected_row(), self.TextEditor, self.WordList)
+        
             
 
 class MyApp(Adw.Application):
