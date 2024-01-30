@@ -5,6 +5,7 @@ gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 from gi.repository import Gtk, Adw
 
+sel_row = None
 dict = {}
 with open("dict.json", "r", encoding="utf-8") as file:
     data = json.load(file)
@@ -49,7 +50,7 @@ class MainWindow(Gtk.ApplicationWindow):
         self.saveWord = Gtk.Button(label='Save Word', hexpand=True)
         self.boxFunc.append(self.saveWord)
 
-        def showAddWordDialog(self, WordList):
+        def showAddWordDialog(self, WordList, TextEditor):
             dialog = Gtk.Dialog()
             dialog.set_title('Add new word?')
             dialog.set_default_size(300, 130)
@@ -91,23 +92,32 @@ class MainWindow(Gtk.ApplicationWindow):
             def showAddWordDialogCancelPressed(self):
                 dialog.destroy()
 
-            def showAddWordDialogOkayPressed(self, WordList):
+            def showAddWordDialogOkayPressed(self, WordList, TextEditor):
                 buffer = newWordEntry.get_buffer()
                 buffer = buffer.get_text()
                 print(buffer)
                 dict[buffer] = ""
                 WordList.append(Gtk.Label(label=buffer))
                 dialog.destroy()
+                SaveWord(self, TextEditor)
+                for row in WordList:
+                    name = row.get_child()
+                    label = name.get_text()
+                    if label == buffer:
+                        WordList.select_row(row)
 
             addWordCancel.connect('clicked', showAddWordDialogCancelPressed)
-            addWordOkay.connect('clicked', showAddWordDialogOkayPressed, WordList)
+            addWordOkay.connect('clicked', showAddWordDialogOkayPressed, WordList, TextEditor)
 
         with open("dict.json", "r", encoding="utf-8") as file:
             data = json.load(file)
         for key in data:
             self.WordList.append(Gtk.Label(label=key))
         
+        
         def showWord(self, row, TextEditor):
+            global sel_row
+            sel_row = row
             selectedItem = row.get_child()
             global lable_name
             lable_name = selectedItem.get_text()
@@ -124,11 +134,13 @@ class MainWindow(Gtk.ApplicationWindow):
                 json.dump(dict, file, sort_keys=True, ensure_ascii=False)
                 print(dict)
 
-        def DeleteWord(self, row, TextEditor, WordList):
-            if row is not None:
+        def DeleteWord(self, TextEditor, WordList):
+            print(sel_row)
+            if sel_row is not None:
                 with open("dict.json", "r", encoding="utf-8") as file:
                     data = json.load(file)
-                selectedItem = row.get_child()
+                print(sel_row)
+                selectedItem = sel_row.get_child()
                 row_data = selectedItem.get_text()
                 print(row_data)
                 data.pop(row_data)
@@ -139,12 +151,13 @@ class MainWindow(Gtk.ApplicationWindow):
                     data = json.load(file)
                 for key in data:
                     WordList.append(Gtk.Label(label=key))
-                TextEditor.set_buffer("")
+                TextEditor.set_buffer(Gtk.TextBuffer().set_text(""))
 
-        self.WordList.connect("row-activated", showWord, self.TextEditor)
+        self.WordList.connect("row-selected", showWord, self.TextEditor)
+        self.WordList.select_row(self.WordList.get_row_at_index(0))
         self.saveWord.connect("clicked", SaveWord, self.TextEditor)
-        self.addWordBtn.connect('clicked', showAddWordDialog, self.WordList)
-        self.rmWord.connect('clicked', DeleteWord, self.WordList.get_selected_row(), self.TextEditor, self.WordList)
+        self.addWordBtn.connect('clicked', showAddWordDialog, self.WordList, self.TextEditor)
+        self.rmWord.connect('clicked', DeleteWord, self.TextEditor, self.WordList)
         
             
 
