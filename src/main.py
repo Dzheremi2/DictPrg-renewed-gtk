@@ -16,6 +16,7 @@ class MainWindow(Gtk.ApplicationWindow):
         super().__init__(*args, **kwargs)
         self.set_default_size(850, 600)
         self.set_title('DictPrg')
+        self.set_icon_name('accessories-dictionary')
         
 
         self.boxMain = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
