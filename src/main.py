@@ -2,9 +2,12 @@ import sys
 import os
 import gi
 import json
+import toolz
 gi.require_version('Gtk', '4.0')
 gi.require_version('Adw', '1')
 from gi.repository import Gtk, Adw
+
+cur_search_type = True
 
 workDir = os.popen("pwd").read()
 print(workDir)
@@ -45,6 +48,19 @@ if 'dict.json' in files:
 
             self.WordList = Gtk.ListBox(hexpand=True, vexpand=True)
             self.scrollWordList.set_child(self.WordList)
+
+            self.boxSearch = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+            self.boxSearch.set_spacing(5)
+            self.boxFunc.append(self.boxSearch)
+
+            self.search = Gtk.SearchEntry(hexpand=True)
+            self.search.set_search_delay(1)
+            self.boxSearch.append(self.search)
+            self.sInList = Gtk.ToggleButton(icon_name='view-list')
+            self.sInValue = Gtk.ToggleButton(icon_name='format-text-underline')
+            self.sInValue.set_group(self.sInList)
+            self.boxSearch.append(self.sInList)
+            self.boxSearch.append(self.sInValue)
 
             self.boxFunc.append(self.boxBtn)
 
@@ -170,10 +186,51 @@ if 'dict.json' in files:
                     WordList.select_row(WordList.get_row_at_index(0))
                     print(dict)
                     
+            def determineSearchType(self, sInList):
+                global cur_search_type
+                cur_search_type = sInList.get_active()
+                print(cur_search_type)
+            
+            def searchInWordList(self, WordList, TextEditor, search):
+                global cur_search_type
+                if cur_search_type == True:
+                    print('ListSearch')
+                    if search.get_text() != "":
+                        with open("dict.json", "r", encoding="utf-8") as file:
+                            data = json.load(file)
+                        WordList.remove_all()
+                        for key in data:
+                            if search.get_text() in key:
+                                WordList.append(Gtk.Label(label=key))
+                    else:
+                        with open("dict.json", "r", encoding="utf-8") as file:
+                            data = json.load(file)
+                        for key in data:
+                            WordList.append(Gtk.Label(label=key))
+                elif cur_search_type == False:
+                    #print('ValSearch')
+                    if search.get_text() != '':
+                        with open("dict.json", "r", encoding="utf-8") as file:
+                            data = json.load(file)
+                        WordList.remove_all()
+                        for key, value in data.items():
+                            if search.get_text() in value:
+                                keys = toolz.valfilter(lambda item: item == value, data)
+                                for key in keys:
+                                    WordList.append(Gtk.Label(label=key))
+                    else:
+                        with open("dict.json", "r", encoding="utf-8") as file:
+                            data = json.load(file)
+                        for key in data:
+                            WordList.append(Gtk.Label(label=key))
+                            
+            self.sInList.set_active(True)
             self.WordList.connect("row-selected", showWord, self.TextEditor)
             self.saveWord.connect("clicked", SaveWord, self.TextEditor)
             self.addWordBtn.connect('clicked', showAddWordDialog, self.WordList, self.TextEditor)
             self.rmWord.connect('clicked', DeleteWord, self.TextEditor, self.WordList)
+            self.search.connect('search_changed', searchInWordList, self.WordList, self.TextEditor, self.search)
+            self.sInList.connect('toggled', determineSearchType, self.sInList)
             self.WordList.select_row(self.WordList.get_row_at_index(0))
             
                 
