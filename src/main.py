@@ -8,6 +8,7 @@ gi.require_version('Adw', '1')
 from gi.repository import Gtk, Adw
 
 cur_search_type = True
+win = None
 
 
 
@@ -26,6 +27,16 @@ if os.path.exists(f'{os.path.expanduser('~')}/.local/share/DictPrg') == True and
             self.set_default_size(850, 600)
             self.set_title('DictPrg')
             self.set_icon_name('accessories-dictionary')
+
+            self.header = Gtk.HeaderBar()
+            self.set_titlebar(self.header)
+    
+            self.boxHeader = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+            self.header.set_title_widget(self.boxHeader)
+            self.headerLabel = Gtk.Label(label='DictPrg', hexpand=True, justify='center')
+            self.boxHeader.append(self.headerLabel)
+            self.aboutButton = Gtk.Button(icon_name='help-about')
+            self.boxHeader.append(self.aboutButton)
             
 
             self.boxMain = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
@@ -132,7 +143,20 @@ if os.path.exists(f'{os.path.expanduser('~')}/.local/share/DictPrg') == True and
                 addWordCancel.connect('clicked', showAddWordDialogCancelPressed)
                 addWordOkay.connect('clicked', showAddWordDialogOkayPressed, WordList, TextEditor)
             
-            
+            def showAboutDialog(self, win):
+                aboutDialog = Adw.AboutWindow()
+                aboutDialog.set_application_icon('accessories-dictionary')
+                aboutDialog.set_developer_name('Dzheremi')
+                aboutDialog.set_application_name('DictPrg')
+                aboutDialog.set_website('https://github.com/Dzheremi2/DictPrg-renewed-gtk')
+                aboutDialog.set_issue_url('https://github.com/Dzheremi2/DictPrg-renewed-gtk/issues')
+                aboutDialog.set_version('1.5')
+                aboutDialog.set_developers(['Dzheremi'])
+                aboutDialog.set_artists(['Dzheremi'])
+                aboutDialog.set_transient_for(win)
+
+                aboutDialog.present()
+
             def showWord(self, row, TextEditor):
                 TextEditor.set_buffer(Gtk.TextBuffer().set_text(""))
                 global sel_row
@@ -226,6 +250,7 @@ if os.path.exists(f'{os.path.expanduser('~')}/.local/share/DictPrg') == True and
             self.rmWord.connect('clicked', DeleteWord, self.TextEditor, self.WordList)
             self.search.connect('search_changed', searchInWordList, self.WordList, self.TextEditor, self.search)
             self.sInList.connect('toggled', determineSearchType, self.sInList)
+            self.aboutButton.connect('clicked', showAboutDialog, win)
             self.WordList.select_row(self.WordList.get_row_at_index(0))
                 
 
@@ -235,6 +260,7 @@ if os.path.exists(f'{os.path.expanduser('~')}/.local/share/DictPrg') == True and
             self.connect('activate', self.on_activate)
 
         def on_activate(self, app):
+            global win
             self.win = MainWindow(application=app)
             self.win.present()
             
