@@ -131,11 +131,6 @@ if 'dict.json' in files:
 
                 addWordCancel.connect('clicked', showAddWordDialogCancelPressed)
                 addWordOkay.connect('clicked', showAddWordDialogOkayPressed, WordList, TextEditor)
-
-            with open("dict.json", "r", encoding="utf-8") as file:
-                data = json.load(file)
-            for key in data:
-                self.WordList.append(Gtk.Label(label=key))
             
             
             def showWord(self, row, TextEditor):
@@ -232,7 +227,6 @@ if 'dict.json' in files:
             self.search.connect('search_changed', searchInWordList, self.WordList, self.TextEditor, self.search)
             self.sInList.connect('toggled', determineSearchType, self.sInList)
             self.WordList.select_row(self.WordList.get_row_at_index(0))
-            
                 
 
     class MyApp(Adw.Application):
