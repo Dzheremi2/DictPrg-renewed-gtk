@@ -9,14 +9,14 @@ from gi.repository import Gtk, Adw
 
 cur_search_type = True
 
-workDir = os.popen("pwd").read()
-print(workDir)
-files = os.listdir(workDir[:-1])
-print(files)
-if 'dict.json' in files:
+
+
+if os.path.exists(f'{os.path.expanduser('~')}/.local/share/DictPrg') == True and os.path.exists(f'{os.path.expanduser('~')}/.local/share/DictPrg/dict.json') == True:
+    files = os.listdir(f'{os.path.expanduser('~')}/.local/share/DictPrg/')
+    print(files)
     sel_row = None
     dict = {}
-    with open("dict.json", "r", encoding="utf-8") as file:
+    with open(f"{os.path.expanduser('~')}/.local/share/DictPrg/dict.json", "r", encoding="utf-8") as file:
         data = json.load(file)
         dict = data
 
@@ -146,7 +146,7 @@ if 'dict.json' in files:
                 TextEditor.set_buffer(buffer)
 
             def SaveWord(self, TextEditor):
-                with open("dict.json", "r", encoding="utf-8") as file:
+                with open(f"{os.path.expanduser('~')}/.local/share/DictPrg/dict.json", "r", encoding="utf-8") as file:
                     data = json.load(file)
                     dict = data
                 selectedItem = sel_row.get_child()
@@ -155,7 +155,7 @@ if 'dict.json' in files:
                 buffer = buffer.get_text(buffer.get_start_iter(), buffer.get_end_iter(), False)
                 dict[lable_name] = buffer
                 print(dict)
-                with open("dict.json", "w", encoding="utf-8") as file:
+                with open(f"{os.path.expanduser('~')}/.local/share/DictPrg/dict.json", "w", encoding="utf-8") as file:
                     json.dump(dict, file, sort_keys=True, ensure_ascii=False)
                     print(dict)
 
@@ -163,17 +163,17 @@ if 'dict.json' in files:
                 print(sel_row)
                 if sel_row is not None:
                     global dict
-                    with open("dict.json", "r", encoding="utf-8") as file:
+                    with open(f"{os.path.expanduser('~')}/.local/share/DictPrg/dict.json", "r", encoding="utf-8") as file:
                         data = json.load(file)
                     selectedItem = sel_row.get_child()
                     row_data = selectedItem.get_text()
                     print(row_data)
                     data.pop(row_data)
-                    with open("dict.json", "w", encoding="utf-8") as file:
+                    with open(f"{os.path.expanduser('~')}/.local/share/DictPrg/dict.json", "w", encoding="utf-8") as file:
                         json.dump(data, file, ensure_ascii=False)
                     print(os.system('cat dict.json'))
                     WordList.remove_all()
-                    with open("dict.json", "r", encoding="utf-8") as file:
+                    with open(f"{os.path.expanduser('~')}/.local/share/DictPrg/dict.json", "r", encoding="utf-8") as file:
                         data = json.load(file)
                     for key in data:
                         WordList.append(Gtk.Label(label=key))
@@ -191,21 +191,21 @@ if 'dict.json' in files:
                 if cur_search_type == True:
                     print('ListSearch')
                     if search.get_text() != "":
-                        with open("dict.json", "r", encoding="utf-8") as file:
+                        with open(f"{os.path.expanduser('~')}/.local/share/DictPrg/dict.json", "r", encoding="utf-8") as file:
                             data = json.load(file)
                         WordList.remove_all()
                         for key in data:
                             if search.get_text() in key:
                                 WordList.append(Gtk.Label(label=key))
                     else:
-                        with open("dict.json", "r", encoding="utf-8") as file:
+                        with open(f"{os.path.expanduser('~')}/.local/share/DictPrg/dict.json", "r", encoding="utf-8") as file:
                             data = json.load(file)
                         for key in data:
                             WordList.append(Gtk.Label(label=key))
                 elif cur_search_type == False:
                     #print('ValSearch')
                     if search.get_text() != '':
-                        with open("dict.json", "r", encoding="utf-8") as file:
+                        with open(f"{os.path.expanduser('~')}/.local/share/DictPrg/dict.json", "r", encoding="utf-8") as file:
                             data = json.load(file)
                         WordList.remove_all()
                         for key, value in data.items():
@@ -214,7 +214,7 @@ if 'dict.json' in files:
                                 for key in keys:
                                     WordList.append(Gtk.Label(label=key))
                     else:
-                        with open("dict.json", "r", encoding="utf-8") as file:
+                        with open(f"{os.path.expanduser('~')}/.local/share/DictPrg/dict.json", "r", encoding="utf-8") as file:
                             data = json.load(file)
                         for key in data:
                             WordList.append(Gtk.Label(label=key))
@@ -242,8 +242,8 @@ if 'dict.json' in files:
     app = MyApp(application_id="oss.dzheremi.DictPrg")
     app.run(sys.argv)
 else:
-    os.system("touch dict.json")
-    with open('dict.json', 'w') as file:
+    os.system(f"mkdir {os.path.expanduser('~')}/.local/share/DictPrg/ -p && touch {os.path.expanduser('~')}/.local/share/DictPrg/dict.json")
+    with open(f'{os.path.expanduser('~')}/.local/share/DictPrg/dict.json', 'w') as file:
         file.write('{"Initial word" : "Translate"}')
 
     class MainWindow(Gtk.ApplicationWindow):
@@ -286,3 +286,4 @@ else:
 
     app = MyApp(application_id="oss.dzheremi.DictPrg")
     app.run(sys.argv)
+    #os.system(f'mkdir {os.path.expanduser('~')}/.local/share/DictPrg -p')
