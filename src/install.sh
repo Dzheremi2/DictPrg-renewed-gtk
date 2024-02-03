@@ -11,6 +11,7 @@ echo Installing Dependencies
 echo ""
 
 pip install pygobject
+pip install toolz
 
 echo "Compiling via PyInstaller with --onefile argument"
 echo ""
