@@ -27,6 +27,7 @@ if os.path.exists(f'{os.path.expanduser('~')}/.local/share/DictPrg') == True and
             self.set_default_size(850, 600)
             self.set_title('DictPrg')
             self.set_icon_name('accessories-dictionary')
+            self.mwin = self
 
             self.header = Gtk.HeaderBar()
             self.set_titlebar(self.header)
@@ -143,8 +144,9 @@ if os.path.exists(f'{os.path.expanduser('~')}/.local/share/DictPrg') == True and
                 addWordCancel.connect('clicked', showAddWordDialogCancelPressed)
                 addWordOkay.connect('clicked', showAddWordDialogOkayPressed, WordList, TextEditor)
             
-            def showAboutDialog(self, win):
+            def showAboutDialog(self, mwin):
                 aboutDialog = Adw.AboutWindow()
+                aboutDialog.set_transient_for(mwin)
                 aboutDialog.set_application_icon('accessories-dictionary')
                 aboutDialog.set_developer_name('Dzheremi')
                 aboutDialog.set_application_name('DictPrg')
@@ -153,7 +155,6 @@ if os.path.exists(f'{os.path.expanduser('~')}/.local/share/DictPrg') == True and
                 aboutDialog.set_version('1.5')
                 aboutDialog.set_developers(['Dzheremi'])
                 aboutDialog.set_artists(['Dzheremi'])
-                aboutDialog.set_transient_for(win)
 
                 aboutDialog.present()
 
@@ -250,7 +251,7 @@ if os.path.exists(f'{os.path.expanduser('~')}/.local/share/DictPrg') == True and
             self.rmWord.connect('clicked', DeleteWord, self.TextEditor, self.WordList)
             self.search.connect('search_changed', searchInWordList, self.WordList, self.TextEditor, self.search)
             self.sInList.connect('toggled', determineSearchType, self.sInList)
-            self.aboutButton.connect('clicked', showAboutDialog, win)
+            self.aboutButton.connect('clicked', showAboutDialog, self.mwin)
             self.WordList.select_row(self.WordList.get_row_at_index(0))
                 
 
