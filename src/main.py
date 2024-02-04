@@ -26,7 +26,18 @@ if 'dict.json' in files:
             self.set_default_size(850, 600)
             self.set_title('DictPrg')
             self.set_icon_name('accessories-dictionary')
+            self.mwin = self
             
+
+            self.header = Gtk.HeaderBar()
+            self.set_titlebar(self.header)
+    
+            self.boxHeader = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+            self.header.set_title_widget(self.boxHeader)
+            self.headerLabel = Gtk.Label(label='DictPrg', hexpand=True, justify='center')
+            self.boxHeader.append(self.headerLabel)
+            self.aboutButton = Gtk.Button(icon_name='help-about')
+            self.boxHeader.append(self.aboutButton)
 
             self.boxMain = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
             self.boxMain.set_spacing(5)
@@ -145,6 +156,21 @@ if 'dict.json' in files:
                 buffer.set_text(dict[lable_name])
                 TextEditor.set_buffer(buffer)
 
+            def showAboutDialog(self, mwin):
+                aboutDialog = Adw.AboutWindow()
+                aboutDialog.set_application_icon('accessories-dictionary')
+                aboutDialog.set_developer_name('Dzheremi')
+                aboutDialog.set_application_name('DictPrg')
+                aboutDialog.set_website('https://github.com/Dzheremi2/DictPrg-renewed-gtk')
+                aboutDialog.set_issue_url('https://github.com/Dzheremi2/DictPrg-renewed-gtk/issues')
+                aboutDialog.set_version('1.5')
+                aboutDialog.set_developers(['Dzheremi'])
+                aboutDialog.set_artists(['Dzheremi'])
+                aboutDialog.set_transient_for(mwin)
+
+                aboutDialog.present()
+
+
             def SaveWord(self, TextEditor):
                 with open("dict.json", "r", encoding="utf-8") as file:
                     data = json.load(file)
@@ -226,6 +252,7 @@ if 'dict.json' in files:
             self.rmWord.connect('clicked', DeleteWord, self.TextEditor, self.WordList)
             self.search.connect('search_changed', searchInWordList, self.WordList, self.TextEditor, self.search)
             self.sInList.connect('toggled', determineSearchType, self.sInList)
+            self.aboutButton.connect('clicked', showAboutDialog, self.mwin)
             self.WordList.select_row(self.WordList.get_row_at_index(0))
                 
 
